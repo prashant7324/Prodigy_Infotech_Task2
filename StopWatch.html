@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Circular Stopwatch with Laps</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #c3ecf5, #e6dee9);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .circle {
+      width: 250px;
+      height: 250px;
+      border: 12px solid #4CAF50;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+      background: white;
+    }
+
+    #time {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: white;
+      font-weight: bold;
+      min-width: 90px;
+    }
+
+    #start { background-color: #4CAF50; }
+    #stop  { background-color: #f44336; }
+    #reset { background-color: #2196F3; }
+    #lap   { background-color: #9C27B0; }
+
+    button:hover { opacity: 0.9; }
+
+    .lap-times {
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 250px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .lap-times h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .lap-times ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+    }
+
+    .lap-times li {
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+      font-size: 0.95rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="circle">
+      <div id="time">00:00:00</div>
+    </div>
+    <div class="controls">
+      <button id="start">Start</button>
+      <button id="stop">Stop</button>
+      <button id="lap">Lap</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div class="lap-times">
+      <h3>Lap Times</h3>
+      <ul id="lapList"></ul>
+    </div>
+  </div>
+
+  <script>
+    let startTime, interval;
+    let elapsedTime = 0;
+    let running = false;
+    let lapCounter = 0;
+
+    const display = document.getElementById('time');
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+    const resetBtn = document.getElementById('reset');
+    const lapBtn = document.getElementById('lap');
+    const lapList = document.getElementById('lapList');
+
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      const centiseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
+      return `${minutes}:${seconds}:${centiseconds}`;
+    }
+
+    function updateDisplay() {
+      const now = Date.now();
+      const diff = now - startTime + elapsedTime;
+      display.textContent = formatTime(diff);
+    }
+
+    startBtn.onclick = () => {
+      if (!running) {
+        startTime = Date.now();
+        interval = setInterval(updateDisplay, 10);
+        running = true;
+      }
+    };
+
+    stopBtn.onclick = () => {
+      if (running) {
+        clearInterval(interval);
+        elapsedTime += Date.now() - startTime;
+        running = false;
+      }
+    };
+
+    resetBtn.onclick = () => {
+      clearInterval(interval);
+      elapsedTime = 0;
+      running = false;
+      lapCounter = 0;
+      display.textContent = '00:00:00';
+      lapList.innerHTML = '';
+    };
+
+    lapBtn.onclick = () => {
+      if (running) {
+        const now = Date.now();
+        const diff = now - startTime + elapsedTime;
+        lapCounter++;
+        const li = document.createElement('li');
+        li.textContent = `Lap ${lapCounter}: ${formatTime(diff)}`;
+        lapList.prepend(li); // Show latest on top
+      }
+    };
+  </script>
+</body>
+</html>
